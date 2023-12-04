@@ -1,0 +1,100 @@
+
+paths:
+  /{storeId}/reviews:
+    get:
+      tags:
+        - Store
+      summary: 가게 별 리뷰 조회 로직
+      parameters:
+        - name: storeId
+          in: path
+          schema:
+            type: integer
+          required: true
+        - name: reviewId
+          in: query
+          required: false
+          schema:
+            properties:
+              reviewId:
+                type: integer
+        - name: paging
+          in: query
+          required: true
+          schema:
+            properties:
+              size:
+                type: integer
+      responses:
+        '200':
+          description: 리뷰 조회 성공
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+                example: 200
+              isSuccess:
+                type: boolean
+                example: true
+              code:
+                type: integer
+                example: 2000
+              message:
+                type: string
+                example: "success!"
+              data:
+                type: array
+                example: {
+                  "reviewData": [
+                    {
+                      "user_name": "SwaggerTest1",
+                      "rate": 5,
+                      "review_body": "리뷰1",
+                      "create_date": "2000.01.01"
+                    },
+                    {
+                      "user_name": "SwaggerTest2",
+                      "rate": 4.5,
+                      "review_body": "리뷰2",
+                      "create_date": "2000.02.02"
+                    }
+                  ],
+                  "cursorId": 1
+                }
+
+        '400':
+          description: 잘못된 요청
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+                example: 400
+              isSuccess:
+                type: boolean
+                example: false
+              code:
+                type: integer
+                example: COMMON001
+              message:
+                type: string
+                example: 잘못된 요청입니다
+
+        '500':
+          description: 서버 에러
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+                example: 500
+              isSuccess:
+                type: boolean
+                example: false
+              code:
+                type: integer
+                example: COMMON000
+              message:
+                type: string
+                example: 서버 에러, 관리자에게 문의 바랍니다.

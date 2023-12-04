@@ -5,6 +5,7 @@ import { userRouter } from './src/routes/user.route.js';
 import cors from "cors";
 import { specs } from './config/swagger/swagger.config.js';
 import SwaggerUi from 'swagger-ui-express';
+import {storeRouter} from "./src/routes/store.route.js";
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.get('/hello', (req, res) => {
 // router setting
 app.use('/temp', tempRouter);
 app.use('/user', userRouter);
+app.use('/:storeId', storeRouter);
 
 // swagger
 app.use('/api-docs', SwaggerUi.serve, SwaggerUi.setup(specs));
@@ -55,6 +57,9 @@ app.use((err, req, res, next) => {
   res.status(err.data.status || status.INTERNAL_SERVER_ERROR).send(response(err.data));
 });
 
+
+
 app.listen(app.get('port'), () => {
   console.log(`Example app listening on port ${app.get('port')}`);
 });
+
