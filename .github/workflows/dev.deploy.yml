@@ -1,0 +1,86 @@
+name: Node.js Dev CI/CD
+
+on:
+  pull_request:      # pull request -> merge 가 되었을 때 Github Action 실행!
+    types: [ closed ]
+  workflow_dispatch: # 수동 실행도 가능하도록 함
+
+jobs:
+  build:
+    # pull 요청이 dev에 merge 되었을 때 아래 steps를 실행
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+
+    runs-on: ubuntu-latest  # 우분투 최신 버전으로 실행
+
+    strategy:
+      matrix:
+        node-version: ['18.x']  # 노드 버전 지정! 여러 개도 가능! ['18.x', '14.x'] 요렇게
+
+    steps:
+      # build 할 코드를 가져옴 (코드 checkout - github에서 제공해주는 checkout@v3 사용)
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Node.js 세팅
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # dependencies 설치, test and build
+      - name: Install dependencies
+        run: npm ci   # dependencies 설치 npm ci, npm install 모두 다 됨!
+
+      - name: Run Build
+        run: npm run build # 빌드
+
+      # 배포 패키지 생성
+      - name: Generate deployment package
+        run: |
+          cp -R .platform dist
+          cp package.json dist/package.json
+          cp package-lock.json dist/package-lock.json
+          cp Procfile dist/Procfile
+          cd dist
+          zip -r deploy.zip .
+
+      # 생성한 deploy.zip 파일 내부 확인용!
+      - name: Get Zip Inside
+        run: zipinfo -1 dist/deploy.zip
+
+      # 현재 시간 얻기 (Build 시점의 시간 얻기)
+      - name: Get current time
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: YYYY-MM-DDTHH-mm-ss
+          utcOffset: "+09:00" # 한국 시간 고려
+
+      # 현재 시간 출력 (위에서 얻은 build 시점의 시간 보여주기🤯)
+      - name: Show Current Time
+        run: echo "CurrentTime=${{steps.current-time.outputs.formattedTime}}"
+        shell: bash
+
+      # Beanstalk 배포
+      - name: Beanstalk Deploy
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{secrets.AWS_ACTION_ACCESS_KEY_ID}}
+          aws_secret_key: ${{secrets.AWS_ACTION_SECRET_ACCESS_KEY}}
+          application_name: test8-dev
+          environment_name: Test8-dev-env
+          version_label: github-action-${{ steps.current-time.outputs.formattedTime }}  # version_label은 이전에 배포한 label과 중복되면 안됨!
+          use_existing_version_if_available: true
+          region: ap-northeast-2
+          deployment_package: dist/deploy.zip
+          wait_for_deployment: false  # 바로 Beanstalk으로 넘어갈 수 있도록 함
+
+      # 그냥 다 했다고 출력하기
+      - name: Deployed!
+        run: echo App deployed to ELB
