@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:dev": "nodemon --exec babel-node index.js",
     "start:dist": "node ./dist/main.js",
-    "start": "node main.js",
+    "start": "node app.js",
     "build:prod": "webpack --mode production",
     "build:dev": "webpack --mode development"
   },
