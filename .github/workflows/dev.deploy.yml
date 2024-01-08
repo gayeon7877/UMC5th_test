@@ -62,7 +62,7 @@ jobs:
           format: YYYY-MM-DDTHH-mm-ss
           utcOffset: "+09:00" # 한국 시간 고려
 
-      # 현재 시간 출력 (위에서 얻은 build 시점의 시간 보여주기)
+      # 현재 시간 출력 (위에서 얻은 build 시점의 시간 보여주기🤯)
       - name: Show Current Time
         run: echo "CurrentTime=${{steps.current-time.outputs.formattedTime}}"
         shell: bash
