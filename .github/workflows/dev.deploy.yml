@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: ['18.x']  # 노드 버전 지정! 여러 개도 가능! ['18.x', '14.x'] 요렇게
+        node-version: ['20.x']  # 노드 버전 지정! 여러 개도 가능! ['18.x', '14.x'] 요렇게
 
     steps:
       # build 할 코드를 가져옴 (코드 checkout - github에서 제공해주는 checkout@v3 사용)
